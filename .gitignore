@@ -2,8 +2,7 @@
 
 # Ignore file extensions
 *~
+*.kra-autosave.kra
 
 # Ignore files
 Gemfile.lock
-
-
