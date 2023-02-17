@@ -1,0 +1,9 @@
+# Ignore directories
+
+# Ignore file extensions
+*~
+
+# Ignore files
+Gemfile.lock
+
+
