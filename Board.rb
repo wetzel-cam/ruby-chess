@@ -1,49 +1,47 @@
 class Board
-    attr_reader :tiles
+    ASCII_A = 97
+    ASCII_8 = 56
     
-    def initialize
-        @tiles = []
-        @background = []
-        @scale = 2
-        @tileset = Tileset.new(
-            'background-tiles.png',
-            tile_width:  8,
-            tile_height: 8,
-            padding:     0,
-            spacing:     0,
-            scale:       @scale
-        )
+    @@tile = {}
+    @@background = []
+    @@scale = 4
 
-        @tileset.define_tile('black', 0, 0)
-        @tileset.define_tile('white', 1, 0)
-        @tileset.define_tile('blue' , 2, 0)
-        @tileset.define_tile('green', 3, 0)
-        
-        draw_board
-        setup
-    end
+    @@tileset = Tileset.new(
+        'resources/background-tiles.png',
+        tile_width:        8,
+        tile_height:       8,
+        padding:           0,
+        spacing:           0,
+        scale:       @@scale,
+        z:                 0
+    )
 
-    def draw_board
+    @@tileset.define_tile('black', 0, 0)
+    @@tileset.define_tile('white', 1, 0)
+    @@tileset.define_tile('blue' , 2, 0)
+    @@tileset.define_tile('green', 3, 0)
+
+    def self.draw_board
         (0..7).each do |y|
             (0..7).each do |x|
                 if y % 2 == 0
                     if x % 2 == 0
-                        @tileset.set_tile('green', [
-                            { x: x * (8 * @scale), y: y * (8 * @scale) },
+                        @@tileset.set_tile('white', [
+                            { x: x * (8 * @@scale), y: y * (8 * @@scale) },
                         ])
                     else
-                        @tileset.set_tile('white', [
-                            { x: x * (8 * @scale), y: y * (8 * @scale) },
+                        @@tileset.set_tile('green', [
+                            { x: x * (8 * @@scale), y: y * (8 * @@scale) },
                         ])
                     end
                 else
                     if x % 2 == 0
-                        @tileset.set_tile('white', [
-                            { x: x * (8 * @scale), y: y * (8 * @scale) },
+                        @@tileset.set_tile('green', [
+                            { x: x * (8 * @@scale), y: y * (8 * @@scale) },
                         ])
                     else
-                        @tileset.set_tile('green', [
-                            { x: x * (8 * @scale), y: y * (8 * @scale) },
+                        @@tileset.set_tile('white', [
+                            { x: x * (8 * @@scale), y: y * (8 * @@scale) },
                         ])
                     end
                 end
@@ -51,58 +49,76 @@ class Board
         end
     end
 
-    def setup
-        @tiles << Pawn.new('b', 'a8', [0, 0])
-        @tiles << Pawn.new('b', 'b8', [1, 0])
-        @tiles << Piece.new('R', 'b', 'a7')
-        @tiles << Piece.new('K', 'w', 'b7')
-    end
+    def self.setup
+        self.draw_board
 
-=begin
-    def setup
-        (0..63).each do |x|
-            if x == 0
-                @tiles << Piece.new('R', 'w', 'a1')
-                @tiles << Piece.new('N', 'w', 'b1')
-                @tiles << Piece.new('B', 'w', 'c1')
-                @tiles << Piece.new('Q', 'w', 'd1')
-                @tiles << Piece.new('K', 'w', 'e1')
-                @tiles << Piece.new('B', 'w', 'f1')
-                @tiles << Piece.new('N', 'w', 'g1')
-                @tiles << Piece.new('R', 'w', 'h1')
-            elsif x >= 8 && x < 16
-                @tiles << Pawn.new('w', [97 + (x % 8), 50].pack("CC"))
-            elsif x >= 16 && x < 48
-                @tiles << ''
-            elsif x >= 48 && x < 56
-                @tiles << Pawn.new('b', [97 + (x % 8), 55].pack("CC"))
-            elsif x == 56
-                @tiles << Piece.new('R', 'b', 'a8')
-                @tiles << Piece.new('N', 'b', 'b8')
-                @tiles << Piece.new('B', 'b', 'c8')
-                @tiles << Piece.new('Q', 'b', 'd8')
-                @tiles << Piece.new('K', 'b', 'e8')
-                @tiles << Piece.new('B', 'b', 'f8')
-                @tiles << Piece.new('N', 'b', 'g8')
-                @tiles << Piece.new('R', 'b', 'h8')
+        ('a'..'h').each do |x|
+            Pawn.new('black', (x + '7'))
+            Pawn.new('white', (x + '2'))
+
+            case x
+            when 'a', 'h'
+                Rook.new('black', (x + '8'))
+                Rook.new('white', (x + '1'))
+            when 'b', 'g'
+                Knight.new('black', (x + '8'))
+                Knight.new('white', (x + '1'))
+            when 'c', 'f'
+                Bishop.new('black', (x + '8'))
+                Bishop.new('white', (x + '1'))
+            when 'd'
+                Queen.new('black', (x + '8'))
+                Queen.new('white', (x + '1'))
+            when 'e'
+                King.new('black', (x + '8'))
+                King.new('white', (x + '1'))
             end
         end
     end
-=end
+    
+    def self.update_board_position(piece)
+        @@tile[piece.board_position] = piece
+    end
 
-    def display
-        (63..1).step(-1).each do |x|
-            if (x % 8) == 0
-                puts
+    def self._to_screen_position(board_position)
+        x_val = board_position.getbyte(0) - ASCII_A
+        y_val = (board_position.getbyte(1) - ASCII_8).abs
+        
+        { x: (x_val * 8 * @@scale), y: (y_val * 8 * @@scale) }
+    end
+
+    def self.scale
+        @@scale
+    end
+
+    def self.scale_increase
+        @@scale += 1
+    end
+
+    def self.scale_decrease
+        @@scale -= 1
+    end
+
+    def self.update
+        Board.draw_board
+    end
+    
+    def self.display
+        (ASCII_8..(ASCII_8-7)).step(-1).each do |y|
+            ('a'..'h').each do |x|
+                location = [x, y].pack('ac')
+                piece = @@tile[location]
+
+                if piece == nil
+                    print "x"
+                else
+                    print piece.id
+                end
+
+                print ","
             end
 
-            if @tiles[x - 1].class == String
-                print @tiles[x - 1]
-            else
-                print @tiles[x - 1].name + @tiles[x - 1].location
-            end
-
-            print ','
+            puts "\n"
         end
     end
 end

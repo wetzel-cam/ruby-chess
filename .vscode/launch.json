@@ -8,7 +8,7 @@
             "name": "Debug Main",
             "type": "Ruby",
             "request": "launch",
-            "program": "${workspaceRoot}/main.rb"
+            "program": "${workspaceRoot}/main.rb",
         }
     ]
 }

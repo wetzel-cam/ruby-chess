@@ -1,4 +1,5 @@
 # Ignore directories
+vendor/
 
 # Ignore file extensions
 *~
